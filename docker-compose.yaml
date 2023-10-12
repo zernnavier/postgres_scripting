@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_DB: postairline
+      POSTGRES_USER: postuser
+      POSTGRES_PASSWORD: postmammothera
+    volumes:
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql # Mount the init.sql script
+    ports:
+      - "5432:5432"  # Optional, if you want to map container port 5432 to host port 5432
+
+  python-app:
+    image: python:3.8-slim
+    command: sh -c "python -m venv /app/venv && . /app/venv/bin/activate && pip install --upgrade pip && pip install -r /app/requirements.txt && python -u /app/connect.py"
+    depends_on:
+      - postgres
+    volumes:
+      - ./scripts/connect.py:/app/connect.py      # Mount the Python script
+      - ./requirements.txt:/app/requirements.txt  # Mount the requirements.txt file
